@@ -33,3 +33,11 @@ You can get information about URL by a GET request to http://localhost:8080/info
 ### REDIRECT
 You can consume a short URL by issuing a GET request to http://localhost:8080/shortlink
 ![](/screens/redirect.jpg)
+
+### TODO:
+```sh
+- Add validations
+- Add app logging
+- Add middleware
+- Add errors handling(error.go)
+- Add possibility to create short links with given name
