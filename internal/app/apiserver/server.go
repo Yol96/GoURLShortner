@@ -95,6 +95,7 @@ func (s *server) redirectToLink() http.HandlerFunc {
 			return
 		}
 
+		s.logger.Infof("Request for redirect: %s", url)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	}
 }
@@ -104,6 +105,7 @@ func (s *server) error(w http.ResponseWriter, r *http.Request, statusCode int, e
 }
 
 func (s *server) respond(w http.ResponseWriter, r *http.Request, statusCode int, data interface{}) {
+	s.logger.Infof("Respond for %+v: code:%d, data:%+v", r.URL, statusCode, data)
 	w.WriteHeader(statusCode)
 	if data != nil {
 		json.NewEncoder(w).Encode(data)
