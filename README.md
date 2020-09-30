@@ -35,9 +35,7 @@ You can consume a short URL by issuing a GET request to http://localhost:8080/sh
 ![](/screens/redirect.jpg)
 
 ### TODO:
-```sh
-- Add validations
-- Add app logging
-- Add middleware
-- Add errors handling(error.go)
-- Add possibility to create short links with given name
+- [ ] Add validations
+- [ ] Add app logging
+- [x] Add errors handling(error.go)
+- [ ] Add possibility to create short links with given name
