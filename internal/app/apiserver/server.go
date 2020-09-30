@@ -16,12 +16,6 @@ type server struct {
 	store  *store.Store
 }
 
-// shortReq contains request struct fields for createNewShortLink() route
-type shortReq struct {
-	Address        string `json:"address" validate:"required"`
-	ExpirationTime int64  `json:"expiration_time" validate:"min=0"`
-}
-
 // newServer creates a new configured server
 func newServer(store *store.Store) *server {
 	s := &server{
@@ -50,27 +44,27 @@ func (s *server) configureRouter() {
 
 // createNewShortLink returns new handlerFunc function for "/new" route
 func (s *server) createNewShortLink() http.HandlerFunc {
+	type request struct {
+		Address        string `json:"address" validate:"required"`
+		ExpirationTime int64  `json:"expiration_time" validate:"min=0"`
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request shortReq
-		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		req := &request{}
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
-		defer r.Body.Close()
-
 		//TODO: add validation
 
-		link, err := s.store.User().Create(request.Address, request.ExpirationTime)
+		link, err := s.store.User().Create(req.Address, req.ExpirationTime)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		jStr, _ := json.Marshal(link)
-		w.WriteHeader(http.StatusOK)
-		w.Write(jStr)
+		s.respond(w, r, http.StatusCreated, link)
 	}
 }
 
@@ -82,14 +76,11 @@ func (s *server) getShortLinkInfo() http.HandlerFunc {
 
 		info, err := s.store.User().Info(link)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		jStr, _ := json.Marshal(info)
-		w.WriteHeader(http.StatusOK)
-		w.Write(jStr)
+		s.respond(w, r, http.StatusOK, info)
 	}
 }
 
@@ -100,10 +91,21 @@ func (s *server) redirectToLink() http.HandlerFunc {
 
 		url, err := s.store.User().Get(vars["link"])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	}
+}
+
+func (s *server) error(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
+	s.respond(w, r, statusCode, map[string]string{"error": err.Error()})
+}
+
+func (s *server) respond(w http.ResponseWriter, r *http.Request, statusCode int, data interface{}) {
+	w.WriteHeader(statusCode)
+	if data != nil {
+		json.NewEncoder(w).Encode(data)
 	}
 }
