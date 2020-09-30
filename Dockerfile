@@ -1,6 +1,5 @@
 FROM golang:latest
 
-FROM golang:latest 
 RUN mkdir /app 
 ADD . /app/
 WORKDIR /app/cmd/apiserver
