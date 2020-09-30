@@ -12,8 +12,19 @@ $ ./apiserver
 ```
 Using Docker-compose:
 ```sh
+$ docker-compose build
 $ docker-compose up
 ```
+
+Also u can add .env file in root folder, for example:
+```sh
+APP_SERVER_PORT=":8080"
+APP_LOGRUS_LEVEL="debug"
+APP_REDIS_ADDRESS="redis:6379"
+APP_REDIS_PASSWORD=""
+APP_REDIS_DB=0
+```
+
 
 ### POST
 The POST request should include the address and expiration_time parameters as follows:
