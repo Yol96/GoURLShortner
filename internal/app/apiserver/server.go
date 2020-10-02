@@ -7,6 +7,7 @@ import (
 	"github.com/Yol96/GoURLShortner/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // server contains server struct with configured router, logger, storage
@@ -45,7 +46,7 @@ func (s *server) configureRouter() {
 // createNewShortLink returns new handlerFunc function for "/new" route
 func (s *server) createNewShortLink() http.HandlerFunc {
 	type request struct {
-		Address        string `json:"address" validate:"required"`
+		Address        string `json:"address" validate:"required,url"`
 		ExpirationTime int64  `json:"expiration_time" validate:"min=0"`
 	}
 
@@ -56,11 +57,14 @@ func (s *server) createNewShortLink() http.HandlerFunc {
 			return
 		}
 
-		//TODO: add validation
+		if err := validator.New().Struct(req); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
 
 		link, err := s.store.User().Create(req.Address, req.ExpirationTime)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
