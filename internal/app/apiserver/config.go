@@ -30,8 +30,10 @@ func NewConfig() (*Config, error) {
 		logLevel = "debug"
 	}
 
-	return &Config{
+	config := &Config{
 		ServerPort:  address,
 		LogrusLevel: logLevel,
-	}, nil
+	}
+
+	return config, nil
 }

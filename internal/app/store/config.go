@@ -41,9 +41,11 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{
+	config := &Config{
 		address:  address,
 		password: password,
 		db:       index,
-	}, nil
+	}
+
+	return config, nil
 }

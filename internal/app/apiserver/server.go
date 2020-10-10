@@ -3,11 +3,12 @@ package apiserver
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/Yol96/GoURLShortner/internal/app/model"
 	"github.com/Yol96/GoURLShortner/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // server contains server struct with configured router, logger, storage
@@ -47,7 +48,7 @@ func (s *server) configureRouter() {
 func (s *server) createNewShortLink() http.HandlerFunc {
 	type request struct {
 		Address        string `json:"address" validate:"required,url"`
-		ExpirationTime int64  `json:"expiration_time" validate:"min=0"`
+		ExpirationTime int    `json:"expiration_time" validate:"min=0"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -57,18 +58,18 @@ func (s *server) createNewShortLink() http.HandlerFunc {
 			return
 		}
 
-		if err := validator.New().Struct(req); err != nil {
+		sl := &model.Link{
+			OriginalAddress: req.Address,
+			CreatedAt:       time.Now().String(),
+			ExpirationTime:  req.ExpirationTime,
+		}
+
+		if err := s.store.User().Create(sl); err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
-		link, err := s.store.User().Create(req.Address, req.ExpirationTime)
-		if err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-
-		s.respond(w, r, http.StatusCreated, link)
+		s.respond(w, r, http.StatusCreated, sl)
 	}
 }
 
@@ -78,13 +79,16 @@ func (s *server) getShortLinkInfo() http.HandlerFunc {
 		values := r.URL.Query()
 		link := values.Get("link")
 
-		info, err := s.store.User().Info(link)
-		if err != nil {
+		sl := &model.Link{
+			ShortLink: link,
+		}
+
+		if err := s.store.User().Info(sl); err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
-		s.respond(w, r, http.StatusOK, info)
+		s.respond(w, r, http.StatusOK, sl)
 	}
 }
 

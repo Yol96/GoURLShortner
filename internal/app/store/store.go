@@ -12,6 +12,7 @@ type Store struct {
 
 // User creates a new userrepository
 func (cli *Store) User() *UserRepository {
+	// TODO: add test store for testing
 	if cli.userRepository != nil {
 		return cli.userRepository
 	}
@@ -41,7 +42,9 @@ func NewStore(config *Config) (*Store, error) {
 		return nil, err
 	}
 
-	return &Store{
+	store := &Store{
 		Cli: client,
-	}, nil
+	}
+
+	return store, nil
 }

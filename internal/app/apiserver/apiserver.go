@@ -25,5 +25,6 @@ func Start(config *Config) error {
 	// Create a new configured server
 	srv := newServer(store)
 	srv.logger.Infof("Starting API server with next params: config:%+v db:%+v", config, db)
+	
 	return http.ListenAndServe(config.ServerPort, srv)
 }
