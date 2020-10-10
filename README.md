@@ -16,7 +16,7 @@ $ docker-compose build
 $ docker-compose up
 ```
 
-Also u can add .env file in root folder, for example:
+Also you can add .env file in root folder, for example:
 ```sh
 APP_SERVER_PORT=":8080"
 APP_LOGRUS_LEVEL="debug"
@@ -50,3 +50,5 @@ You can consume a short URL by issuing a GET request to http://localhost:8080/sh
 - [x] Add app logging
 - [x] Add errors handling(error.go)
 - [ ] Add possibility to create short links with given name
+- [ ] Add tests
+- [ ] Add UI
