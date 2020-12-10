@@ -7,6 +7,7 @@ import (
 
 	"github.com/Yol96/GoURLShortner/internal/app/model"
 	"github.com/Yol96/GoURLShortner/internal/app/store"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -39,9 +40,13 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // configureRouter adds routes
 func (s *server) configureRouter() {
 	//TODO: add middleware
-	s.router.HandleFunc("/new", s.createNewShortLink()).Methods("POST")
-	s.router.HandleFunc("/info", s.getShortLinkInfo()).Methods("GET")
-	s.router.HandleFunc("/{link:[a-zA-Z0-9]{1,11}}", s.redirectToLink()).Methods("GET")
+	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+	api := s.router.PathPrefix("/api").Subrouter()
+	api.HandleFunc("/new", s.createNewShortLink()).Methods("POST")
+	api.HandleFunc("/info", s.getShortLinkInfo()).Methods("GET")
+	api.HandleFunc("/{link:[a-zA-Z0-9]{1,11}}", s.redirectToLink()).Methods("GET")
+
+	s.router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
 }
 
 // createNewShortLink returns new handlerFunc function for "/new" route
@@ -66,6 +71,11 @@ func (s *server) createNewShortLink() http.HandlerFunc {
 
 		if err := s.store.User().Create(sl); err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		if err := createQRCodeImage(sl); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 

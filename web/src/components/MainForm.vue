@@ -65,6 +65,11 @@
           `${baseURL}${responseData.short_link}`
         }}</a>
         <br />
+        Generated QR:
+        <a target="_" :href="`${baseStaticURL}${responseData.short_link}.png`">{{
+          `${baseStaticURL}${responseData.short_link}.png`
+        }}</a>
+        <br />
         {{
           `Created at: ${responseData.created_at}`
         }}
@@ -103,7 +108,7 @@ export default {
       } else {
         let finalFormData = {
           address: this.formData.address,
-          expiration_time: this.formData.expiration_time
+          expiration_time: parseInt(this.formData.expiration_time)
         };
         this.axios
           .post("/new", finalFormData)
