@@ -45,10 +45,14 @@ You can get information about URL by a GET request to http://localhost:8080/info
 You can consume a short URL by issuing a GET request to http://localhost:8080/shortlink
 ![](/screens/redirect.jpg)
 
+### WEB
+![](/screens/web.jpg)
+
 ### TODO:
 - [x] Add validations
 - [x] Add app logging
 - [x] Add errors handling(error.go)
+- [x] Add QR
 - [ ] Add possibility to create short links with given name
 - [ ] Add tests
-- [ ] Add UI
+- [x] Add UI
